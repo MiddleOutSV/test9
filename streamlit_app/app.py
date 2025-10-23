@@ -1,20 +1,17 @@
 import streamlit as st
 import yfinance as yf
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-import pandas as pd
 from datetime import datetime
-from streamlit_plotly_events import plotly_events
 
-# Page configuration
+# 페이지 설정
 st.set_page_config(
-    page_title="Stock Lineup Visualizer",
+    page_title="주식 라인업 빌더",
     page_icon="⚽",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for better styling
+# 커스텀 CSS
 st.markdown("""
     <style>
     .main {
@@ -26,14 +23,25 @@ st.markdown("""
     h1 {
         color: white;
         text-align: center;
+        font-size: 1.8rem;
     }
     .stAlert {
         background-color: rgba(255, 255, 255, 0.9);
     }
+    /* 모바일 최적화 */
+    @media (max-width: 768px) {
+        h1 {
+            font-size: 1.3rem;
+        }
+        .stButton button {
+            width: 100%;
+            font-size: 0.9rem;
+        }
+    }
     </style>
     """, unsafe_allow_html=True)
 
-# Exchange to country code mapping
+# 거래소 매핑
 EXCHANGE_TO_COUNTRY = {
     'NMS': 'US', 'NYQ': 'US', 'PCX': 'US', 'BTS': 'US',
     'NGM': 'US', 'NCM': 'US', 'ASE': 'US',
@@ -41,20 +49,35 @@ EXCHANGE_TO_COUNTRY = {
     'FRA': 'DE', 'EPA': 'FR', 'TOR': 'CA',
 }
 
+# 포지션 정의 (4-3-3 포메이션, 세로 방향)
+POSITIONS = {
+    'GK': {'name': '골키퍼', 'x': 34, 'y': 95},
+    'DF1': {'name': '왼쪽 수비수', 'x': 15, 'y': 75},
+    'DF2': {'name': '중앙 수비수 1', 'x': 30, 'y': 75},
+    'DF3': {'name': '중앙 수비수 2', 'x': 38, 'y': 75},
+    'DF4': {'name': '오른쪽 수비수', 'x': 53, 'y': 75},
+    'MF1': {'name': '왼쪽 미드필더', 'x': 15, 'y': 50},
+    'MF2': {'name': '중앙 미드필더', 'x': 34, 'y': 50},
+    'MF3': {'name': '오른쪽 미드필더', 'x': 53, 'y': 50},
+    'FW1': {'name': '왼쪽 공격수', 'x': 20, 'y': 25},
+    'FW2': {'name': '중앙 공격수', 'x': 34, 'y': 20},
+    'FW3': {'name': '오른쪽 공격수', 'x': 48, 'y': 25},
+}
+
 def get_flag_emoji(country_code):
-    """Convert country code to flag emoji"""
+    """국가 코드를 국기 이모지로 변환"""
     if not country_code:
         return '🇺🇸'
     codepoints = [127397 + ord(char) for char in country_code.upper()]
     return ''.join(chr(cp) for cp in codepoints)
 
 def get_period_for_timeframe(timeframe):
-    """Convert timeframe to yfinance period"""
-    periods = {'1W': '1mo', '1M': '3mo', '6M': '1y', '1Y': '2y'}
+    """타임프레임을 yfinance period로 변환"""
+    periods = {'1주일': '1mo', '1개월': '3mo', '6개월': '1y', '1년': '2y'}
     return periods.get(timeframe, '1y')
 
 def calculate_returns(ticker_symbol, timeframe):
-    """Calculate returns for the given timeframe"""
+    """수익률 계산"""
     try:
         ticker = yf.Ticker(ticker_symbol)
         period = get_period_for_timeframe(timeframe)
@@ -63,7 +86,7 @@ def calculate_returns(ticker_symbol, timeframe):
         if hist.empty:
             return None
 
-        days_map = {'1W': 7, '1M': 30, '6M': 180, '1Y': 365}
+        days_map = {'1주일': 7, '1개월': 30, '6개월': 180, '1년': 365}
         days_back = min(days_map.get(timeframe, 365), len(hist) - 1)
 
         if days_back < 1:
@@ -74,11 +97,10 @@ def calculate_returns(ticker_symbol, timeframe):
         returns = ((current_price - start_price) / start_price) * 100
         return round(returns, 2)
     except Exception as e:
-        st.error(f"Error calculating returns for {ticker_symbol}: {e}")
         return None
 
 def get_ticker_info(symbol, timeframe):
-    """Get ticker information"""
+    """티커 정보 가져오기"""
     try:
         ticker = yf.Ticker(symbol.upper())
         info = ticker.info
@@ -96,292 +118,301 @@ def get_ticker_info(symbol, timeframe):
             'returns': returns,
         }
     except Exception as e:
-        st.error(f"Error fetching data for {symbol}: {e}")
+        st.error(f"❌ 티커 데이터를 가져오는데 실패했습니다: {symbol}")
         return None
 
 def get_performance_color(returns):
-    """Get color based on performance"""
+    """성과에 따른 색상 반환"""
     if returns is None:
-        return '#A0AEC0'  # Gray
+        return '#A0AEC0'
     if returns > 10:
-        return '#22C55E'  # Green - Excellent
+        return '#22C55E'
     if returns > 5:
-        return '#84CC16'  # Light Green - Good
+        return '#84CC16'
     if returns > 0:
-        return '#3B82F6'  # Blue - Positive
+        return '#3B82F6'
     if returns > -5:
-        return '#F59E0B'  # Orange - Negative
-    return '#EF4444'  # Red - Poor
+        return '#F59E0B'
+    return '#EF4444'
 
 def create_soccer_field(players):
-    """Create soccer field visualization with Plotly"""
-
-    # Create figure
+    """축구장 시각화 생성 (세로 방향)"""
     fig = go.Figure()
 
-    # Field dimensions
-    field_length = 105
+    # 축구장 크기 (세로 방향)
     field_width = 68
+    field_length = 105
 
-    # Add grass background with striped pattern
-    for i in range(0, int(field_length), 10):
+    # 잔디 배경 (세로 줄무늬)
+    for i in range(0, int(field_width), 10):
         color = '#2D5016' if (i // 10) % 2 == 0 else '#3A6B1E'
         fig.add_shape(
             type="rect",
-            x0=i, y0=0, x1=i+10, y1=field_width,
+            x0=i, y0=0, x1=i+10, y1=field_length,
             fillcolor=color,
             line=dict(width=0),
             layer="below"
         )
 
-    # Field outline
-    fig.add_shape(type="rect", x0=0, y0=0, x1=field_length, y1=field_width,
+    # 필드 외곽선
+    fig.add_shape(type="rect", x0=0, y0=0, x1=field_width, y1=field_length,
                   line=dict(color="white", width=3), fillcolor="rgba(0,0,0,0)")
 
-    # Center line
-    fig.add_shape(type="line", x0=field_length/2, y0=0, x1=field_length/2, y1=field_width,
+    # 중앙선
+    fig.add_shape(type="line", x0=0, y0=field_length/2, x1=field_width, y1=field_length/2,
                   line=dict(color="white", width=2))
 
-    # Center circle
-    fig.add_shape(type="circle", x0=field_length/2-9.15, y0=field_width/2-9.15,
-                  x1=field_length/2+9.15, y1=field_width/2+9.15,
+    # 센터 서클
+    fig.add_shape(type="circle",
+                  x0=field_width/2-9.15, y0=field_length/2-9.15,
+                  x1=field_width/2+9.15, y1=field_length/2+9.15,
                   line=dict(color="white", width=2), fillcolor="rgba(0,0,0,0)")
 
-    # Center spot
-    fig.add_shape(type="circle", x0=field_length/2-0.5, y0=field_width/2-0.5,
-                  x1=field_length/2+0.5, y1=field_width/2+0.5,
+    # 센터 스팟
+    fig.add_shape(type="circle",
+                  x0=field_width/2-0.5, y0=field_length/2-0.5,
+                  x1=field_width/2+0.5, y1=field_length/2+0.5,
                   fillcolor="white", line=dict(color="white", width=0))
 
-    # Penalty boxes
-    for x in [0, field_length]:
-        direction = 1 if x == 0 else -1
-        # Large penalty box
+    # 페널티 박스 (상단과 하단)
+    for y in [0, field_length]:
+        direction = 1 if y == 0 else -1
+        # 큰 페널티 박스
         fig.add_shape(type="rect",
-                     x0=x, y0=field_width/2-20.16,
-                     x1=x+direction*16.5, y1=field_width/2+20.16,
+                     x0=field_width/2-20.16, y0=y,
+                     x1=field_width/2+20.16, y1=y+direction*16.5,
                      line=dict(color="white", width=2), fillcolor="rgba(0,0,0,0)")
-        # Small penalty box (goal box)
+        # 골 박스
         fig.add_shape(type="rect",
-                     x0=x, y0=field_width/2-9.16,
-                     x1=x+direction*5.5, y1=field_width/2+9.16,
+                     x0=field_width/2-9.16, y0=y,
+                     x1=field_width/2+9.16, y1=y+direction*5.5,
                      line=dict(color="white", width=2), fillcolor="rgba(0,0,0,0)")
-        # Penalty spot
-        spot_x = 11 if x == 0 else field_length - 11
+        # 페널티 스팟
+        spot_y = 11 if y == 0 else field_length - 11
         fig.add_shape(type="circle",
-                     x0=spot_x-0.5, y0=field_width/2-0.5,
-                     x1=spot_x+0.5, y1=field_width/2+0.5,
+                     x0=field_width/2-0.5, y0=spot_y-0.5,
+                     x1=field_width/2+0.5, y1=spot_y+0.5,
                      fillcolor="white", line=dict(color="white", width=0))
 
-    # Add players
+    # 선수 추가
     if players:
         x_coords = [p['x'] for p in players]
         y_coords = [p['y'] for p in players]
         colors = [get_performance_color(p.get('returns')) for p in players]
 
-        # Create hover text
         hover_texts = []
         for p in players:
             flag = get_flag_emoji(p.get('countryCode', 'US'))
-            returns_str = f"+{p['returns']}%" if p.get('returns', 0) >= 0 else f"{p['returns']}%"
-            text = f"{flag} <b>{p['symbol']}</b><br>{p['name']}<br><b>{returns_str}</b>"
+            returns = p.get('returns')
+            if returns is not None:
+                returns_str = f"+{returns}%" if returns >= 0 else f"{returns}%"
+            else:
+                returns_str = "N/A"
+            text = f"{flag} <b>{p['symbol']}</b><br>{p['name']}<br><b>{returns_str}</b><br>포지션: {p.get('position_name', '')}"
             hover_texts.append(text)
 
-        # Add player markers
         fig.add_trace(go.Scatter(
             x=x_coords,
             y=y_coords,
             mode='markers+text',
             marker=dict(
-                size=30,
+                size=35,
                 color=colors,
                 line=dict(color='white', width=3),
                 symbol='circle'
             ),
             text=[p['symbol'] for p in players],
             textposition="middle center",
-            textfont=dict(color='white', size=10, family='Arial Black'),
+            textfont=dict(color='white', size=11, family='Arial Black'),
             hovertext=hover_texts,
             hoverinfo='text',
             showlegend=False
         ))
 
-    # Update layout
+    # 레이아웃 업데이트
     fig.update_layout(
-        width=1000,
-        height=650,
+        width=400,  # 모바일 최적화
+        height=600,  # 세로로 긴 레이아웃
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
         xaxis=dict(
-            range=[-2, field_length+2],
+            range=[-2, field_width+2],
             showgrid=False,
             zeroline=False,
             showticklabels=False,
         ),
         yaxis=dict(
-            range=[-2, field_width+2],
+            range=[-2, field_length+2],
             showgrid=False,
             zeroline=False,
             showticklabels=False,
             scaleanchor="x",
             scaleratio=1,
         ),
-        margin=dict(l=20, r=20, t=20, b=20),
+        margin=dict(l=10, r=10, t=10, b=10),
         hovermode='closest',
-        dragmode='pan'
     )
 
     return fig
 
-# Initialize session state
+# 세션 상태 초기화
 if 'players' not in st.session_state:
     st.session_state.players = []
-if 'selected_ticker' not in st.session_state:
-    st.session_state.selected_ticker = None
-if 'waiting_for_click' not in st.session_state:
-    st.session_state.waiting_for_click = False
 
-# Main title
-st.markdown("<h1>⚽ Stock Lineup Visualizer (Streamlit Edition)</h1>", unsafe_allow_html=True)
+# 메인 타이틀
+st.markdown("<h1>⚽ 주식 라인업 빌더</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: white;'>축구 라인업처럼 나만의 주식 포트폴리오를 만들어보세요!</p>", unsafe_allow_html=True)
 
-# Sidebar
+# 사이드바
 with st.sidebar:
-    st.header("📊 Controls")
+    st.header("📊 설정")
 
-    # Timeframe selector
+    # 타임프레임 선택
     timeframe = st.selectbox(
-        "Select Timeframe",
-        options=['1W', '1M', '6M', '1Y'],
-        index=1,
-        format_func=lambda x: {'1W': '1 Week', '1M': '1 Month', '6M': '6 Months', '1Y': '1 Year'}[x]
+        "수익률 기간 선택",
+        options=['1주일', '1개월', '6개월', '1년'],
+        index=1
     )
 
     st.divider()
 
-    # Ticker input
-    st.subheader("Add Ticker")
-    ticker_input = st.text_input("Enter ticker symbol", placeholder="e.g., AAPL", key="ticker_input").upper()
+    # 티커 추가
+    st.subheader("⚽ 선수 추가")
 
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("🎯 Select Position", use_container_width=True,
-                    disabled=len(st.session_state.players) >= 11 or not ticker_input):
-            # Fetch ticker data
-            ticker_data = get_ticker_info(ticker_input, timeframe)
-            if ticker_data:
-                st.session_state.selected_ticker = ticker_data
-                st.session_state.waiting_for_click = True
-                st.info("👆 Click on the field to place the ticker!")
+    # 사용 가능한 포지션 확인
+    occupied_positions = [p['position'] for p in st.session_state.players]
+    available_positions = {k: v for k, v in POSITIONS.items() if k not in occupied_positions}
+
+    if len(st.session_state.players) >= 11:
+        st.warning("⚠️ 최대 11명의 선수를 배치할 수 있습니다!")
+    elif not available_positions:
+        st.warning("⚠️ 모든 포지션이 채워졌습니다!")
+    else:
+        ticker_input = st.text_input(
+            "티커 심볼 입력",
+            placeholder="예: AAPL, GOOGL, TSLA",
+            key="ticker_input"
+        ).upper()
+
+        # 포지션 선택
+        position_key = st.selectbox(
+            "포지션 선택",
+            options=list(available_positions.keys()),
+            format_func=lambda x: f"{available_positions[x]['name']} ({x})",
+            key="position_select"
+        )
+
+        if st.button("➕ 선수 추가", use_container_width=True, type="primary"):
+            if not ticker_input:
+                st.error("❌ 티커를 입력해주세요!")
             else:
-                st.error("Failed to fetch ticker data")
+                with st.spinner(f'{ticker_input} 데이터 불러오는 중...'):
+                    ticker_data = get_ticker_info(ticker_input, timeframe)
+                    if ticker_data:
+                        position_data = POSITIONS[position_key]
+                        new_player = {
+                            **ticker_data,
+                            'position': position_key,
+                            'position_name': position_data['name'],
+                            'x': position_data['x'],
+                            'y': position_data['y']
+                        }
+                        st.session_state.players.append(new_player)
+                        st.success(f"✅ {ticker_input}를 {position_data['name']}에 배치했습니다!")
+                        st.rerun()
 
-    with col2:
-        if st.button("🗑️ Clear All", use_container_width=True):
+    st.divider()
+
+    # 전체 삭제
+    if st.session_state.players:
+        if st.button("🗑️ 전체 삭제", use_container_width=True):
             st.session_state.players = []
-            st.session_state.selected_ticker = None
-            st.session_state.waiting_for_click = False
             st.rerun()
 
-    # Show current status
-    if st.session_state.waiting_for_click and st.session_state.selected_ticker:
-        st.success(f"✅ Ready to place: **{st.session_state.selected_ticker['symbol']}**")
-        st.caption("Click anywhere on the field to place this ticker")
+    # 선수 현황
+    st.metric("현재 선수", f"{len(st.session_state.players)}/11")
 
-    st.divider()
-
-    # Player count
-    st.metric("Players on Field", f"{len(st.session_state.players)}/11")
-
-    # Current lineup
+    # 현재 라인업
     if st.session_state.players:
-        st.subheader("Current Lineup")
+        st.subheader("📋 현재 라인업")
         for idx, player in enumerate(st.session_state.players):
-            col1, col2 = st.columns([4, 1])
-            with col1:
-                flag = get_flag_emoji(player.get('countryCode', 'US'))
-                returns = player.get('returns', 0)
-                returns_str = f"+{returns}%" if returns >= 0 else f"{returns}%"
-                st.caption(f"{flag} **{player['symbol']}** {returns_str}")
-            with col2:
-                if st.button("❌", key=f"remove_{idx}"):
-                    st.session_state.players.pop(idx)
-                    st.rerun()
+            with st.container():
+                col1, col2 = st.columns([4, 1])
+                with col1:
+                    flag = get_flag_emoji(player.get('countryCode', 'US'))
+                    returns = player.get('returns')
+                    if returns is not None:
+                        returns_str = f"+{returns}%" if returns >= 0 else f"{returns}%"
+                        st.caption(f"{flag} **{player['symbol']}** {returns_str}")
+                    else:
+                        st.caption(f"{flag} **{player['symbol']}**")
+                    st.caption(f"└ {player.get('position_name', '')}")
+                with col2:
+                    if st.button("❌", key=f"remove_{idx}"):
+                        st.session_state.players.pop(idx)
+                        st.rerun()
 
     st.divider()
 
-    # Instructions
-    with st.expander("📖 How to Use"):
+    # 도움말
+    with st.expander("📖 사용 방법"):
         st.markdown("""
-        1. Enter a ticker symbol (e.g., AAPL)
-        2. Click "Select Position"
-        3. Click on the field where you want to place it
-        4. Repeat for up to 11 tickers
-        5. Change timeframe to update all returns
+        **1단계:** 티커 심볼 입력 (예: AAPL)
 
-        **Color Legend:**
-        - 🟢 Green: >10% returns
-        - 🟡 Yellow: 5-10% returns
-        - 🔵 Blue: 0-5% returns
-        - 🟠 Orange: -5-0% returns
-        - 🔴 Red: <-5% returns
+        **2단계:** 포지션 선택
+
+        **3단계:** "선수 추가" 클릭
+
+        **4단계:** 최대 11명까지 추가
+
+        **색상 의미:**
+        - 🟢 초록: 10% 이상
+        - 🟡 연두: 5-10%
+        - 🔵 파랑: 0-5%
+        - 🟠 주황: -5-0%
+        - 🔴 빨강: -5% 이하
         """)
 
-    # Popular tickers
-    with st.expander("💡 Popular Tickers"):
-        st.caption("**Tech:** AAPL, GOOGL, MSFT, TSLA, NVDA")
-        st.caption("**Finance:** JPM, BAC, V, MA")
-        st.caption("**Consumer:** WMT, KO, PEP, MCD")
+    # 추천 티커
+    with st.expander("💡 인기 종목"):
+        st.caption("**테크:** AAPL, GOOGL, MSFT, TSLA, NVDA, META")
+        st.caption("**금융:** JPM, BAC, V, MA, GS")
+        st.caption("**소비재:** WMT, KO, PEP, MCD, NKE")
+        st.caption("**헬스케어:** JNJ, PFE, UNH, ABBV")
 
-# Main content - Soccer field
+# 메인 콘텐츠 - 축구장
 st.markdown("---")
 
-# Create and display soccer field
-fig = create_soccer_field(st.session_state.players)
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    fig = create_soccer_field(st.session_state.players)
+    st.plotly_chart(fig, use_container_width=True)
 
-# Use plotly_events to capture clicks
-selected_points = plotly_events(
-    fig,
-    click_event=True,
-    hover_event=False,
-    select_event=False,
-    override_height=650,
-    override_width=1000
-)
+# 안내 메시지
+if len(st.session_state.players) == 0:
+    st.info("👈 왼쪽 사이드바에서 티커를 추가하여 라인업을 구성하세요!")
+elif len(st.session_state.players) < 11:
+    st.info(f"💡 {11 - len(st.session_state.players)}명의 선수를 더 추가할 수 있습니다!")
+else:
+    st.success("🎉 완벽한 라인업입니다! 11명의 선수가 모두 배치되었습니다!")
 
-# Handle click events
-if selected_points and st.session_state.waiting_for_click and st.session_state.selected_ticker:
-    # Get click coordinates
-    click_x = selected_points[0]['x']
-    click_y = selected_points[0]['y']
-
-    # Add player at clicked position
-    new_player = {
-        **st.session_state.selected_ticker,
-        'x': click_x,
-        'y': click_y
-    }
-
-    st.session_state.players.append(new_player)
-    st.session_state.selected_ticker = None
-    st.session_state.waiting_for_click = False
-    st.rerun()
-
-# Update returns when timeframe changes
+# 타임프레임 변경 시 수익률 업데이트
 if 'last_timeframe' not in st.session_state:
     st.session_state.last_timeframe = timeframe
 
 if st.session_state.last_timeframe != timeframe:
-    # Update all players' returns
-    for player in st.session_state.players:
-        updated_info = get_ticker_info(player['symbol'], timeframe)
-        if updated_info:
-            player['returns'] = updated_info['returns']
-    st.session_state.last_timeframe = timeframe
-    st.rerun()
+    with st.spinner('수익률 업데이트 중...'):
+        for player in st.session_state.players:
+            updated_info = get_ticker_info(player['symbol'], timeframe)
+            if updated_info:
+                player['returns'] = updated_info['returns']
+        st.session_state.last_timeframe = timeframe
+        st.rerun()
 
-# Footer
+# 푸터
 st.markdown("---")
 st.markdown(
-    "<p style='text-align: center; color: white;'>Built with ⚽ and 📈 | "
+    "<p style='text-align: center; color: white;'>⚽ + 📈 = 💰 | "
     "Powered by yfinance & Streamlit</p>",
     unsafe_allow_html=True
 )

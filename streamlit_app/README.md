@@ -1,18 +1,19 @@
-# Stock Lineup Visualizer - Streamlit Edition
+# 주식 라인업 빌더 - Streamlit 버전
 
 축구 라인업처럼 주식 포트폴리오를 구성하는 Streamlit 웹앱입니다!
 
-## Features
+## ✨ 주요 기능
 
-- ⚽ **축구장 레이아웃**: 실제 축구장처럼 보이는 초록 잔디 + 하얀 라인
-- 🎯 **클릭 방식 배치**: 티커를 선택한 후 원하는 위치를 클릭
-- 📊 **실시간 주식 데이터**: yfinance로 기업명과 수익률 조회
+- ⚽ **4-3-3 포메이션**: 실제 축구처럼 11개 포지션에 종목 배치
+- 📱 **모바일 최적화**: 세로 레이아웃으로 핸드폰에서 편하게 사용
+- 🎯 **간편한 배치**: 포지션을 선택하고 클릭 한 번으로 추가
+- 📊 **실시간 데이터**: yfinance로 기업명과 수익률 조회
 - 🎨 **성과별 색상**: 수익률에 따라 자동으로 색상 변경
 - 📅 **다양한 기간**: 1주일, 1개월, 6개월, 1년
 - 🏴 **거래소 국기**: 각 티커의 거래소 국기 표시
-- 💯 **최대 11개**: 축구팀처럼 11명까지
+- 🇰🇷 **한국어 인터페이스**: 완전 한국어 지원
 
-## 로컬 실행 방법
+## 🚀 로컬 실행 방법
 
 ### 1. 의존성 설치
 
@@ -29,17 +30,47 @@ streamlit run app.py
 
 브라우저가 자동으로 열립니다! (보통 http://localhost:8501)
 
-## 사용 방법
+## 📱 사용 방법
 
-1. **티커 입력**: 좌측 사이드바에서 티커 심볼 입력 (예: AAPL)
-2. **"Select Position" 클릭**: 티커 데이터를 불러옵니다
-3. **축구장 클릭**: 원하는 위치를 클릭하여 티커 배치
-4. **반복**: 최대 11개까지 추가
-5. **기간 변경**: 상단 드롭다운에서 수익률 기간 선택
+### PC에서 사용
+1. **좌측 사이드바**에서 티커 심볼 입력 (예: AAPL)
+2. **포지션 선택** (골키퍼, 수비수, 미드필더, 공격수)
+3. **"선수 추가"** 버튼 클릭
+4. 최대 11명까지 추가 가능
+5. 상단에서 수익률 기간 변경 가능
 
-## 배포하기 (3분 안에!)
+### 모바일에서 사용
+1. 사이드바는 왼쪽 상단 화살표로 열고 닫기
+2. 세로로 긴 축구장이 화면에 딱 맞게 표시됨
+3. 터치로 쉽게 티커 입력 및 포지션 선택
+4. 버튼이 전체 너비로 표시되어 터치하기 쉬움
 
-### Streamlit Community Cloud (완전 무료, 가장 쉬움!)
+## 🎮 포지션 설명
+
+**4-3-3 포메이션** (위에서 아래로)
+
+### 공격진 (FW) - 상단
+- 🔴 왼쪽 공격수 (FW1)
+- 🔴 중앙 공격수 (FW2)
+- 🔴 오른쪽 공격수 (FW3)
+
+### 미드필더 (MF) - 중앙
+- 🟡 왼쪽 미드필더 (MF1)
+- 🟡 중앙 미드필더 (MF2)
+- 🟡 오른쪽 미드필더 (MF3)
+
+### 수비진 (DF) - 하단
+- 🔵 왼쪽 수비수 (DF1)
+- 🔵 중앙 수비수 1 (DF2)
+- 🔵 중앙 수비수 2 (DF3)
+- 🔵 오른쪽 수비수 (DF4)
+
+### 골키퍼 (GK) - 최하단
+- 🟢 골키퍼 (GK)
+
+## 🌐 배포하기 (3분!)
+
+### Streamlit Community Cloud (완전 무료!)
 
 1. **Streamlit Cloud 접속**
    - https://streamlit.io/cloud 접속
@@ -47,86 +78,97 @@ streamlit run app.py
 
 2. **앱 배포**
    - "New app" 클릭
-   - Repository: 이 저장소 선택
-   - Branch: `claude/stock-lineup-visualizer-011CUPf4kzhYdQ39asps1LBh` (또는 main)
-   - Main file path: `streamlit_app/app.py`
+   - **Repository**: 이 저장소 선택
+   - **Branch**: `claude/stock-lineup-visualizer-011CUPf4kzhYdQ39asps1LBh`
+   - **Main file path**: `streamlit_app/app.py`
    - "Deploy!" 클릭
 
 3. **완료!**
-   - 2-3분 기다리면 배포 완료
-   - 제공되는 URL로 접속하면 바로 사용 가능!
+   - 2-3분 후 배포 완료
+   - 제공되는 URL로 접속
    - 예: `https://your-app.streamlit.app`
 
-**그게 전부입니다!** 환경 변수 설정도, 백엔드 배포도, 프론트엔드 빌드도 필요 없습니다.
+**환경 변수 설정 불필요!**
+**별도 백엔드 배포 불필요!**
+**설정 파일 불필요!**
 
-### 배포 후 자동 업데이트
+### 자동 업데이트
 
 GitHub에 푸시하면 자동으로 재배포됩니다:
 
 ```bash
 git add .
-git commit -m "Update feature"
+git commit -m "기능 업데이트"
 git push
 ```
 
 → Streamlit Cloud가 자동으로 감지하고 재배포!
 
-## 색상 코드 (성과별)
+## 🎨 색상 코드 (성과별)
 
 | 수익률 | 색상 | 의미 |
 |--------|------|------|
-| > 10% | 🟢 Green | 탁월 |
-| 5-10% | 🟡 Yellow-Green | 좋음 |
-| 0-5% | 🔵 Blue | 긍정 |
-| -5-0% | 🟠 Orange | 부정 |
-| < -5% | 🔴 Red | 나쁨 |
+| > 10% | 🟢 초록 | 탁월 |
+| 5-10% | 🟡 연두 | 좋음 |
+| 0-5% | 🔵 파랑 | 긍정 |
+| -5-0% | 🟠 주황 | 부정 |
+| < -5% | 🔴 빨강 | 나쁨 |
 
-## 추천 티커
+## 💡 추천 티커
 
-### 기술주
-- AAPL (Apple)
-- GOOGL (Google)
-- MSFT (Microsoft)
-- TSLA (Tesla)
-- NVDA (NVIDIA)
-- META (Meta/Facebook)
-- AMZN (Amazon)
+### 기술주 (테크)
+- **AAPL** - Apple (애플)
+- **GOOGL** - Google (구글)
+- **MSFT** - Microsoft (마이크로소프트)
+- **TSLA** - Tesla (테슬라)
+- **NVDA** - NVIDIA (엔비디아)
+- **META** - Meta/Facebook (메타)
+- **AMZN** - Amazon (아마존)
 
 ### 금융주
-- JPM (JPMorgan Chase)
-- BAC (Bank of America)
-- GS (Goldman Sachs)
-- V (Visa)
-- MA (Mastercard)
+- **JPM** - JPMorgan Chase
+- **BAC** - Bank of America
+- **GS** - Goldman Sachs
+- **V** - Visa (비자)
+- **MA** - Mastercard (마스터카드)
 
 ### 소비재
-- WMT (Walmart)
-- KO (Coca-Cola)
-- PEP (PepsiCo)
-- MCD (McDonald's)
-- NKE (Nike)
+- **WMT** - Walmart (월마트)
+- **KO** - Coca-Cola (코카콜라)
+- **PEP** - PepsiCo (펩시)
+- **MCD** - McDonald's (맥도날드)
+- **NKE** - Nike (나이키)
 
 ### 헬스케어
-- JNJ (Johnson & Johnson)
-- PFE (Pfizer)
-- UNH (UnitedHealth)
-- ABBV (AbbVie)
+- **JNJ** - Johnson & Johnson
+- **PFE** - Pfizer (화이자)
+- **UNH** - UnitedHealth
+- **ABBV** - AbbVie
 
-## Flask/React 버전과의 차이점
+## 🔄 Flask/React 버전과의 차이점
 
-| 기능 | Flask/React | Streamlit |
-|------|-------------|-----------|
-| **드래그앤드롭** | ✅ 지원 | ❌ 클릭 방식 |
-| **배포 난이도** | 중간 (Backend + Frontend 별도) | 매우 쉬움 (클릭 3번) |
-| **배포 시간** | ~8분 | ~3분 |
-| **커스터마이징** | 자유로움 | 제한적 |
-| **축구장 디자인** | 매우 정교 | 단순화 |
+| 기능 | Flask/React | Streamlit (이 버전) |
+|------|-------------|---------------------|
+| **티커 배치** | 드래그앤드롭 | 포지션 선택 방식 |
+| **배포 난이도** | 중간 (8분) | 매우 쉬움 (3분) |
+| **모바일 최적화** | 반응형 | 세로 레이아웃 최적화 |
+| **언어** | 영어 | 한국어 |
+| **포지션** | 자유 배치 | 4-3-3 포메이션 |
 | **실시간 데이터** | ✅ | ✅ |
 | **수익률 표시** | ✅ | ✅ |
 | **국기 표시** | ✅ | ✅ |
 | **무료 호스팅** | ✅ | ✅ |
 
-## 문제 해결
+## 📱 모바일 최적화 특징
+
+- ✅ 세로로 긴 축구장 (핸드폰 화면에 최적화)
+- ✅ 터치 친화적인 버튼 크기
+- ✅ 사이드바 토글 (메뉴가 거슬리지 않음)
+- ✅ 반응형 폰트 크기
+- ✅ 한 손으로 조작 가능
+- ✅ 스크롤 최소화
+
+## 🛠️ 문제 해결
 
 ### 티커 데이터를 불러올 수 없음
 
@@ -135,85 +177,89 @@ git push
 **해결:**
 - 올바른 티커 심볼인지 확인 (대문자로 입력)
 - 인터넷 연결 확인
-- 다른 티커로 시도
+- 다른 티커로 시도 (예: AAPL)
 
-### 클릭이 작동하지 않음
+### 포지션이 선택되지 않음
 
-**원인:** `streamlit-plotly-events` 설치 문제
+**원인:** 해당 포지션이 이미 차 있음
 
 **해결:**
-```bash
-pip install --upgrade streamlit-plotly-events
-streamlit run app.py
-```
+- 다른 포지션 선택
+- 또는 기존 선수를 삭제하고 다시 추가
 
 ### Streamlit Cloud 배포 실패
 
-**원인:** requirements.txt 경로 문제
+**원인:** Python 버전 문제
 
 **해결:**
-- Main file path가 `streamlit_app/app.py`로 정확히 설정되었는지 확인
-- requirements.txt가 같은 폴더에 있는지 확인
+- `.python-version` 파일이 있는지 확인 (Python 3.11 지정)
+- requirements.txt가 정확한지 확인
 
-## 로컬 개발 팁
+## 📊 기술 스택
 
-### 핫 리로드
+- **Streamlit** - 웹 프레임워크
+- **Plotly** - 인터랙티브 그래픽 (축구장 시각화)
+- **yfinance** - 주식 데이터 API
+- **Pandas** - 데이터 처리
+- **Python 3.11** - 안정적인 실행 환경
 
-Streamlit은 파일을 저장하면 자동으로 "Rerun" 버튼이 표시됩니다. 클릭하면 변경사항이 즉시 반영됩니다.
-
-### 디버깅
-
-```python
-st.write(st.session_state)  # 세션 상태 확인
-st.write(players)  # 변수 확인
-```
-
-### 캐싱으로 성능 향상
-
-자주 호출되는 함수에 `@st.cache_data` 추가:
-
-```python
-@st.cache_data(ttl=3600)  # 1시간 캐시
-def get_ticker_info(symbol, timeframe):
-    # ...
-```
-
-## 기술 스택
-
-- **Streamlit**: 웹 프레임워크
-- **Plotly**: 인터랙티브 그래픽
-- **yfinance**: 주식 데이터
-- **streamlit-plotly-events**: 클릭 이벤트 처리
-- **Pandas**: 데이터 처리
-
-## 프로젝트 구조
+## 📁 프로젝트 구조
 
 ```
 streamlit_app/
-├── app.py              # 메인 애플리케이션
-├── requirements.txt    # Python 의존성
-└── README.md          # 이 파일
+├── app.py               # 메인 애플리케이션
+├── requirements.txt     # Python 의존성
+├── .python-version      # Python 버전 (3.11)
+├── .streamlit/
+│   └── config.toml     # Streamlit 설정
+└── README.md           # 이 파일
 ```
 
-## 향후 개선 사항
+## 🆕 업데이트 내역
 
-- [ ] 포메이션 프리셋 (4-4-2, 4-3-3 등)
+### v2.0 (최신)
+- ✅ 클릭 문제 해결 → 포지션 선택 방식으로 변경
+- ✅ 전체 한국어 변환
+- ✅ 모바일 최적화 (세로 레이아웃)
+- ✅ 4-3-3 포메이션 도입
+- ✅ 반응형 디자인
+- ✅ UX 개선
+
+### v1.0
+- 초기 버전 (클릭 방식, 영어)
+
+## 🎯 향후 개선 계획
+
+- [ ] 다양한 포메이션 (4-4-2, 3-5-2 등)
 - [ ] 라인업 저장/불러오기
-- [ ] 이미지로 내보내기
+- [ ] 이미지로 내보내기 (공유용)
 - [ ] 섹터/산업 정보 추가
-- [ ] 여러 라인업 비교
+- [ ] 여러 라인업 비교 기능
 - [ ] 히스토리 성과 추적
+- [ ] 다크 모드
 
-## 라이센스
+## 📜 라이센스
 
 MIT License - 자유롭게 사용하세요!
 
-## 도움말
+## 💬 피드백
+
+- GitHub Issues로 버그 제보
+- 기능 제안 환영
+- Pull Request 환영
+
+## 🙏 도움말
 
 - Streamlit 문서: https://docs.streamlit.io/
 - yfinance 문서: https://pypi.org/project/yfinance/
-- 이슈 제보: GitHub Issues
+- Plotly 문서: https://plotly.com/python/
 
 ---
 
-Built with ⚽ and 📈 using Streamlit
+**만든 사람:** Claude Code와 함께
+**목적:** 재미있게 주식 포트폴리오 관리하기
+**라이센스:** MIT
+
+⚽ + 📈 = 💰
+
+즐겁게 사용하세요! 🚀
