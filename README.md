@@ -75,6 +75,90 @@ npm start
 
 The app will open at `http://localhost:3000`
 
+## Deployment (웹에서 실행하기)
+
+### 추천 방법: Railway + Vercel (완전 무료)
+
+이 방법이 가장 쉽고 빠릅니다!
+
+#### 1. Backend 배포 (Railway)
+
+1. [Railway](https://railway.app/) 가입 (GitHub 계정으로 로그인)
+2. "New Project" 클릭
+3. "Deploy from GitHub repo" 선택
+4. 이 저장소 선택
+5. "Add variables" 클릭하여 환경 변수 추가:
+   - `PORT`: 자동 설정됨 (건드릴 필요 없음)
+6. Root directory를 `backend`로 설정
+7. 배포 완료되면 URL을 복사 (예: `https://your-app.railway.app`)
+
+#### 2. Frontend 배포 (Vercel)
+
+1. [Vercel](https://vercel.com/) 가입 (GitHub 계정으로 로그인)
+2. "New Project" 클릭
+3. 이 저장소 선택
+4. "Root Directory"를 `frontend`로 설정
+5. Environment Variables 추가:
+   - Name: `REACT_APP_API_URL`
+   - Value: Railway에서 받은 백엔드 URL (예: `https://your-app.railway.app`)
+6. "Deploy" 클릭
+7. 배포 완료! Vercel이 제공하는 URL로 접속하면 됩니다
+
+### 대안 방법 1: Render (Backend + Frontend 모두)
+
+#### Backend 배포
+1. [Render](https://render.com/) 가입
+2. "New Web Service" 클릭
+3. GitHub 저장소 연결
+4. 설정:
+   - **Name**: stock-lineup-backend
+   - **Root Directory**: `backend`
+   - **Environment**: Python 3
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `python app.py`
+   - **Plan**: Free
+5. 배포 후 URL 복사
+
+#### Frontend 배포
+1. Render에서 "New Static Site" 클릭
+2. 설정:
+   - **Name**: stock-lineup-frontend
+   - **Root Directory**: `frontend`
+   - **Build Command**: `npm install && npm run build`
+   - **Publish Directory**: `build`
+3. Environment Variables:
+   - `REACT_APP_API_URL`: 백엔드 URL
+4. Deploy
+
+### 대안 방법 2: Netlify (Frontend만)
+
+1. [Netlify](https://netlify.com/) 가입
+2. "New site from Git" 클릭
+3. 저장소 연결
+4. Build settings:
+   - **Base directory**: `frontend`
+   - **Build command**: `npm run build`
+   - **Publish directory**: `frontend/build`
+5. Environment variables:
+   - `REACT_APP_API_URL`: 백엔드 URL
+6. Deploy
+
+### 배포 체크리스트
+
+- [ ] Backend가 정상 작동하는지 확인 (`/api/health` 엔드포인트 테스트)
+- [ ] Frontend의 환경 변수에 올바른 Backend URL 설정
+- [ ] CORS가 활성화되어 있는지 확인 (이미 설정되어 있음)
+- [ ] 무료 플랜의 경우 일정 시간 후 sleep 모드로 전환될 수 있음 (첫 요청 시 약간 느릴 수 있음)
+
+### 배포 후 테스트
+
+배포된 웹사이트에서:
+1. 티커 입력 (예: AAPL)
+2. 데이터가 정상적으로 로드되는지 확인
+3. 드래그 앤 드롭이 작동하는지 확인
+
+문제가 있다면 브라우저 개발자 도구(F12)의 Console 탭에서 에러 확인!
+
 ## Usage
 
 1. **Add Tickers**: Enter a stock ticker symbol (e.g., AAPL, GOOGL, MSFT) and click "Add Ticker"
