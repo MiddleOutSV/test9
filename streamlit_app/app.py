@@ -23,7 +23,8 @@ st.markdown("""
     h1 {
         color: white;
         text-align: center;
-        font-size: 1.8rem;
+        font-size: 1.44rem;
+        margin-bottom: 0.5rem;
     }
     .stAlert {
         background-color: rgba(255, 255, 255, 0.9);
@@ -49,19 +50,19 @@ EXCHANGE_TO_COUNTRY = {
     'FRA': 'DE', 'EPA': 'FR', 'TOR': 'CA',
 }
 
-# 포지션 정의 (4-3-3 포메이션, 세로 방향)
+# 포지션 정의 (4-3-3 포메이션, 세로 방향 - 골키퍼 하단)
 POSITIONS = {
-    'GK': {'name': '골키퍼', 'x': 34, 'y': 95},
-    'DF1': {'name': '오른쪽 풀백', 'x': 14, 'y': 75},
-    'DF2': {'name': '중앙 수비수 1', 'x': 28, 'y': 75},
-    'DF3': {'name': '중앙 수비수 2', 'x': 40, 'y': 75},
-    'DF4': {'name': '왼쪽 풀백', 'x': 54, 'y': 75},
-    'MF1': {'name': '오른쪽 미드필더', 'x': 15, 'y': 50},
-    'MF2': {'name': '중앙 미드필더', 'x': 34, 'y': 50},
-    'MF3': {'name': '왼쪽 미드필더', 'x': 53, 'y': 50},
-    'FW1': {'name': '오른쪽 공격수', 'x': 20, 'y': 25},
-    'FW2': {'name': '중앙 공격수', 'x': 34, 'y': 20},
-    'FW3': {'name': '왼쪽 공격수', 'x': 48, 'y': 25},
+    'GK': {'name': '골키퍼', 'x': 34, 'y': 10},
+    'DF1': {'name': '오른쪽 풀백', 'x': 14, 'y': 30},
+    'DF2': {'name': '중앙 수비수 1', 'x': 28, 'y': 30},
+    'DF3': {'name': '중앙 수비수 2', 'x': 40, 'y': 30},
+    'DF4': {'name': '왼쪽 풀백', 'x': 54, 'y': 30},
+    'MF1': {'name': '오른쪽 미드필더', 'x': 15, 'y': 55},
+    'MF2': {'name': '중앙 미드필더', 'x': 34, 'y': 55},
+    'MF3': {'name': '왼쪽 미드필더', 'x': 53, 'y': 55},
+    'FW1': {'name': '오른쪽 공격수', 'x': 20, 'y': 80},
+    'FW2': {'name': '중앙 공격수', 'x': 34, 'y': 85},
+    'FW3': {'name': '왼쪽 공격수', 'x': 48, 'y': 80},
 }
 
 def get_flag_emoji(country_code):
@@ -239,10 +240,21 @@ def create_soccer_field(players):
             showlegend=False
         ))
 
+    # 제목 추가 (스크린샷에 포함됨)
+    fig.add_annotation(
+        text="⚽ 올에셋 라인업 빌더",
+        xref="paper", yref="paper",
+        x=0.5, y=1.08,
+        showarrow=False,
+        font=dict(size=20, color="white", family="Arial Black"),
+        xanchor="center",
+        yanchor="top"
+    )
+
     # 레이아웃 업데이트
     fig.update_layout(
         width=400,  # 모바일 최적화
-        height=600,  # 세로로 긴 레이아웃
+        height=650,  # 제목 공간 포함한 높이
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
         xaxis=dict(
@@ -259,7 +271,7 @@ def create_soccer_field(players):
             scaleanchor="x",
             scaleratio=1,
         ),
-        margin=dict(l=10, r=10, t=10, b=10),
+        margin=dict(l=10, r=10, t=60, b=10),  # 상단 마진 증가
         hovermode='closest',
     )
 
@@ -269,9 +281,11 @@ def create_soccer_field(players):
 if 'players' not in st.session_state:
     st.session_state.players = []
 
-# 메인 타이틀
-st.markdown("<h1>⚽ 올에셋 라인업 빌더</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: white;'>축구 라인업처럼 나만의 주식 포트폴리오를 만들어보세요!</p>", unsafe_allow_html=True)
+# 메인 타이틀 (스크린샷용 컨테이너)
+title_container = st.container()
+with title_container:
+    st.markdown("<h1 id='app-title'>⚽ 올에셋 라인업 빌더</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: white; font-size: 0.9rem; margin-top: -0.5rem; margin-bottom: 0.3rem;'>축구 라인업처럼 나만의 주식 포트폴리오를 만들어보세요!</p>", unsafe_allow_html=True)
 
 # 사이드바
 with st.sidebar:
@@ -391,10 +405,29 @@ with st.sidebar:
 # 메인 콘텐츠 - 축구장
 st.markdown("---")
 
+# 축구장 표시
 col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
     fig = create_soccer_field(st.session_state.players)
-    st.plotly_chart(fig, use_container_width=True)
+
+    # Plotly 차트 config (스크린샷 기능 포함)
+    config = {
+        'toImageButtonOptions': {
+            'format': 'png',
+            'filename': '올에셋_라인업',
+            'height': 650,
+            'width': 400,
+            'scale': 3  # 고해상도
+        },
+        'displayModeBar': True,
+        'displaylogo': False,
+        'modeBarButtonsToRemove': ['pan2d', 'lasso2d', 'select2d', 'autoScale2d', 'resetScale2d']
+    }
+
+    st.plotly_chart(fig, use_container_width=True, config=config)
+
+    # 추가 스크린샷 안내
+    st.caption("💡 차트 위에 마우스를 올리면 📷 다운로드 버튼이 나타납니다. 클릭하면 '올에셋 라인업 빌더' 제목이 포함된 이미지로 저장됩니다.")
 
 # 안내 메시지
 if len(st.session_state.players) == 0:
