@@ -418,27 +418,6 @@ with col2:
 
     st.plotly_chart(fig, use_container_width=True, config=config)
 
-    # 스크린샷 버튼
-    if st.session_state.players:  # 선수가 있을 때만 표시
-        try:
-            # Plotly figure를 이미지로 변환
-            img_bytes = fig.to_image(format="png", width=400, height=650, scale=3)
-
-            # 다운로드 버튼
-            st.download_button(
-                label="📷 스크린샷",
-                data=img_bytes,
-                file_name="올에셋_라인업.png",
-                mime="image/png",
-                use_container_width=True,
-                type="primary"
-            )
-            st.caption("💡 버튼을 클릭하면 '올에셋 라인업 빌더' 제목이 포함된 이미지로 저장됩니다.")
-        except Exception as e:
-            st.caption("💡 라인업을 완성한 후 스크린샷을 저장하세요!")
-    else:
-        st.caption("💡 선수를 추가한 후 스크린샷 버튼이 나타납니다.")
-
 # 안내 메시지
 if len(st.session_state.players) == 0:
     st.info("👈 왼쪽 사이드바에서 티커를 추가하여 라인업을 구성하세요!")
