@@ -5,7 +5,7 @@ from datetime import datetime
 
 # 페이지 설정
 st.set_page_config(
-    page_title="주식 라인업 빌더",
+    page_title="올에셋 라인업 빌더",
     page_icon="⚽",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -52,10 +52,10 @@ EXCHANGE_TO_COUNTRY = {
 # 포지션 정의 (4-3-3 포메이션, 세로 방향)
 POSITIONS = {
     'GK': {'name': '골키퍼', 'x': 34, 'y': 95},
-    'DF1': {'name': '왼쪽 수비수', 'x': 15, 'y': 75},
-    'DF2': {'name': '중앙 수비수 1', 'x': 30, 'y': 75},
-    'DF3': {'name': '중앙 수비수 2', 'x': 38, 'y': 75},
-    'DF4': {'name': '오른쪽 수비수', 'x': 53, 'y': 75},
+    'DF1': {'name': '왼쪽 풀백', 'x': 14, 'y': 75},
+    'DF2': {'name': '중앙 수비수 1', 'x': 28, 'y': 75},
+    'DF3': {'name': '중앙 수비수 2', 'x': 40, 'y': 75},
+    'DF4': {'name': '오른쪽 풀백', 'x': 54, 'y': 75},
     'MF1': {'name': '왼쪽 미드필더', 'x': 15, 'y': 50},
     'MF2': {'name': '중앙 미드필더', 'x': 34, 'y': 50},
     'MF3': {'name': '오른쪽 미드필더', 'x': 53, 'y': 50},
@@ -122,18 +122,28 @@ def get_ticker_info(symbol, timeframe):
         return None
 
 def get_performance_color(returns):
-    """성과에 따른 색상 반환"""
+    """성과에 따른 색상 반환 (빨강-파랑 그라데이션)"""
     if returns is None:
-        return '#A0AEC0'
-    if returns > 10:
-        return '#22C55E'
-    if returns > 5:
-        return '#84CC16'
-    if returns > 0:
-        return '#3B82F6'
-    if returns > -5:
-        return '#F59E0B'
-    return '#EF4444'
+        return '#A0AEC0'  # 회색
+
+    if returns >= 0:
+        # 플러스 수익률: 연한 빨강 → 진한 빨강
+        # 0% = 연한 빨강, 30% 이상 = 진한 빨강
+        ratio = min(returns / 30.0, 1.0)  # 0.0 ~ 1.0
+        # 연한 빨강 #FFB3B3 (255, 179, 179) → 진한 빨강 #CC0000 (204, 0, 0)
+        r = int(255 - (51 * ratio))  # 255 → 204
+        g = int(179 - (179 * ratio))  # 179 → 0
+        b = int(179 - (179 * ratio))  # 179 → 0
+        return f'#{r:02X}{g:02X}{b:02X}'
+    else:
+        # 마이너스 수익률: 연한 파랑 → 진한 파랑
+        # 0% = 연한 파랑, -30% 이하 = 진한 파랑
+        ratio = min(abs(returns) / 30.0, 1.0)  # 0.0 ~ 1.0
+        # 연한 파랑 #B3D9FF (179, 217, 255) → 진한 파랑 #0066CC (0, 102, 204)
+        r = int(179 - (179 * ratio))  # 179 → 0
+        g = int(217 - (115 * ratio))  # 217 → 102
+        b = int(255 - (51 * ratio))   # 255 → 204
+        return f'#{r:02X}{g:02X}{b:02X}'
 
 def create_soccer_field(players):
     """축구장 시각화 생성 (세로 방향)"""
@@ -218,7 +228,7 @@ def create_soccer_field(players):
             marker=dict(
                 size=35,
                 color=colors,
-                line=dict(color='white', width=3),
+                line=dict(color='white', width=2.4),
                 symbol='circle'
             ),
             text=[p['symbol'] for p in players],
@@ -260,7 +270,7 @@ if 'players' not in st.session_state:
     st.session_state.players = []
 
 # 메인 타이틀
-st.markdown("<h1>⚽ 주식 라인업 빌더</h1>", unsafe_allow_html=True)
+st.markdown("<h1>⚽ 올에셋 라인업 빌더</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: white;'>축구 라인업처럼 나만의 주식 포트폴리오를 만들어보세요!</p>", unsafe_allow_html=True)
 
 # 사이드바
@@ -366,11 +376,9 @@ with st.sidebar:
         **4단계:** 최대 11명까지 추가
 
         **색상 의미:**
-        - 🟢 초록: 10% 이상
-        - 🟡 연두: 5-10%
-        - 🔵 파랑: 0-5%
-        - 🟠 주황: -5-0%
-        - 🔴 빨강: -5% 이하
+        - 🔴 빨강: 플러스 수익률 (높을수록 진함)
+        - 🔵 파랑: 마이너스 수익률 (낮을수록 진함)
+        - ⚪ 회색: 데이터 없음
         """)
 
     # 추천 티커
