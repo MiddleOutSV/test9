@@ -410,24 +410,34 @@ col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
     fig = create_soccer_field(st.session_state.players)
 
-    # Plotly 차트 config (스크린샷 기능 포함)
+    # Plotly 차트 config (툴바 숨김)
     config = {
-        'toImageButtonOptions': {
-            'format': 'png',
-            'filename': '올에셋_라인업',
-            'height': 650,
-            'width': 400,
-            'scale': 3  # 고해상도
-        },
-        'displayModeBar': True,
-        'displaylogo': False,
-        'modeBarButtonsToRemove': ['pan2d', 'lasso2d', 'select2d', 'autoScale2d', 'resetScale2d']
+        'displayModeBar': False,  # 툴바 숨김
+        'staticPlot': False  # 인터랙티브 유지
     }
 
     st.plotly_chart(fig, use_container_width=True, config=config)
 
-    # 추가 스크린샷 안내
-    st.caption("💡 차트 위에 마우스를 올리면 📷 다운로드 버튼이 나타납니다. 클릭하면 '올에셋 라인업 빌더' 제목이 포함된 이미지로 저장됩니다.")
+    # 스크린샷 버튼
+    if st.session_state.players:  # 선수가 있을 때만 표시
+        try:
+            # Plotly figure를 이미지로 변환
+            img_bytes = fig.to_image(format="png", width=400, height=650, scale=3)
+
+            # 다운로드 버튼
+            st.download_button(
+                label="📷 스크린샷",
+                data=img_bytes,
+                file_name="올에셋_라인업.png",
+                mime="image/png",
+                use_container_width=True,
+                type="primary"
+            )
+            st.caption("💡 버튼을 클릭하면 '올에셋 라인업 빌더' 제목이 포함된 이미지로 저장됩니다.")
+        except Exception as e:
+            st.caption("💡 라인업을 완성한 후 스크린샷을 저장하세요!")
+    else:
+        st.caption("💡 선수를 추가한 후 스크린샷 버튼이 나타납니다.")
 
 # 안내 메시지
 if len(st.session_state.players) == 0:
