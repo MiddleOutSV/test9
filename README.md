@@ -2,7 +2,31 @@
 
 Build your stock portfolio like a soccer team! This web application allows you to visualize your favorite stock tickers as players on a soccer field, complete with performance metrics similar to FotMob's lineup builder.
 
-## Features
+## 🎯 Two Versions Available!
+
+This project comes in **two versions** - choose the one that fits your needs:
+
+### 1. **Flask + React Version** (This README)
+- ✅ Full drag-and-drop functionality
+- ✅ Professional, polished UI
+- ✅ Highly customizable
+- ⚠️ Requires separate backend + frontend deployment
+- 📂 Code: `backend/` and `frontend/` folders
+
+### 2. **Streamlit Version** ([See streamlit_app/README.md](streamlit_app/README.md))
+- ✅ **Easiest to deploy** (3 minutes, 3 clicks!)
+- ✅ Single Python file
+- ✅ Perfect for quick prototypes
+- ⚠️ Click-to-place instead of drag-and-drop
+- 📂 Code: `streamlit_app/` folder
+
+**Quick recommendation:**
+- Want the best UX and don't mind spending 8 minutes deploying? → **Flask + React**
+- Want to deploy in 3 minutes with minimal effort? → **Streamlit**
+
+---
+
+## Features (Flask + React Version)
 
 - **Soccer Field Layout**: Arrange up to 11 stock tickers on a beautiful soccer field background
 - **Drag & Drop**: Freely position each ticker anywhere on the field
