@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: stock-lineup-backend
+    name: trends-backend
     env: python
     region: oregon
     plan: free
