@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>한국-일본 검색어 트렌드 비교</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .timeframe-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.2rem;
+            padding: 40px;
+        }
+
+        .trends-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .trend-column {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .trend-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .trend-header h2 {
+            font-size: 1.8rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .flag {
+            font-size: 2rem;
+        }
+
+        .trend-list {
+            list-style: none;
+        }
+
+        .trend-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #f8f9fa, #ffffff);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .trend-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .rank {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+            min-width: 35px;
+        }
+
+        .keyword {
+            font-size: 1.1rem;
+            color: #333;
+            flex-grow: 1;
+        }
+
+        .empty-item {
+            opacity: 0.3;
+        }
+
+        .timestamp {
+            text-align: center;
+            color: white;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .error {
+            background: #ff4444;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .trends-container {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .timeframe-buttons {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>한국-일본 검색어 트렌드 비교</h1>
+            <p class="subtitle">실시간으로 양국의 인기 검색어를 확인하세요</p>
+        </header>
+
+        <div class="controls">
+            <div class="timeframe-buttons">
+                <button class="timeframe-btn active" data-timeframe="1">오늘</button>
+                <button class="timeframe-btn" data-timeframe="7">지난 1주일</button>
+                <button class="timeframe-btn" data-timeframe="30">지난 1달</button>
+            </div>
+        </div>
+
+        <div id="content"></div>
+    </div>
+
+    <script>
+        const API_URL = window.location.hostname === 'localhost'
+            ? 'http://localhost:5000'
+            : 'https://your-backend-url.com'; // 배포 시 백엔드 URL로 변경
+
+        let currentTimeframe = 1;
+
+        // 기간 버튼 클릭 이벤트
+        document.querySelectorAll('.timeframe-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // 모든 버튼의 active 클래스 제거
+                document.querySelectorAll('.timeframe-btn').forEach(b => b.classList.remove('active'));
+                // 클릭된 버튼에 active 클래스 추가
+                btn.classList.add('active');
+                // 기간 변경
+                currentTimeframe = btn.dataset.timeframe;
+                // 데이터 로드
+                loadTrends();
+            });
+        });
+
+        async function loadTrends() {
+            const contentDiv = document.getElementById('content');
+            contentDiv.innerHTML = '<div class="loading">트렌드 데이터를 불러오는 중...</div>';
+
+            try {
+                const response = await fetch(`${API_URL}/api/trends?timeframe=${currentTimeframe}`);
+
+                if (!response.ok) {
+                    throw new Error('데이터를 불러오는데 실패했습니다.');
+                }
+
+                const data = await response.json();
+                displayTrends(data);
+            } catch (error) {
+                contentDiv.innerHTML = `<div class="error">오류: ${error.message}</div>`;
+            }
+        }
+
+        function displayTrends(data) {
+            const contentDiv = document.getElementById('content');
+
+            const html = `
+                <div class="trends-container">
+                    <div class="trend-column">
+                        <div class="trend-header">
+                            <h2><span class="flag">🇰🇷</span> 한국 인기 검색어</h2>
+                        </div>
+                        <ul class="trend-list">
+                            ${data.korea.map((keyword, index) => `
+                                <li class="trend-item ${keyword ? '' : 'empty-item'}">
+                                    <span class="rank">${index + 1}</span>
+                                    <span class="keyword">${keyword || '-'}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+
+                    <div class="trend-column">
+                        <div class="trend-header">
+                            <h2><span class="flag">🇯🇵</span> 일본 인기 검색어</h2>
+                        </div>
+                        <ul class="trend-list">
+                            ${data.japan.map((keyword, index) => `
+                                <li class="trend-item ${keyword ? '' : 'empty-item'}">
+                                    <span class="rank">${index + 1}</span>
+                                    <span class="keyword">${keyword || '-'}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                </div>
+                <div class="timestamp">
+                    마지막 업데이트: ${new Date(data.timestamp).toLocaleString('ko-KR')}
+                </div>
+            `;
+
+            contentDiv.innerHTML = html;
+        }
+
+        // 페이지 로드 시 초기 데이터 로드
+        loadTrends();
+    </script>
+</body>
+</html>

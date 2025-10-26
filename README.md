@@ -1,307 +1,139 @@
-# Stock Lineup Visualizer
+# 한국-일본 검색어 트렌드 비교 웹앱
 
-Build your stock portfolio like a soccer team! This web application allows you to visualize your favorite stock tickers as players on a soccer field, complete with performance metrics similar to FotMob's lineup builder.
+pytrends를 이용하여 한국과 일본의 실시간 검색어 트렌드를 비교하는 웹 애플리케이션입니다.
 
-## 🎯 Two Versions Available!
+## 기능
 
-This project comes in **two versions** - choose the one that fits your needs:
+- **실시간 트렌드 비교**: 한국과 일본의 인기 검색어를 좌우로 나란히 표시
+- **기간 선택**: 오늘, 지난 1주일, 지난 1달 중 선택 가능
+- **반응형 디자인**: 모바일과 데스크톱 모두에서 최적화된 UI
+- **자동 새로고침**: 기간 변경 시 자동으로 데이터 갱신
 
-### 1. **Flask + React Version** (This README)
-- ✅ Full drag-and-drop functionality
-- ✅ Professional, polished UI
-- ✅ Highly customizable
-- ⚠️ Requires separate backend + frontend deployment
-- 📂 Code: `backend/` and `frontend/` folders
+## 기술 스택
 
-### 2. **Streamlit Version** ([See streamlit_app/README.md](streamlit_app/README.md))
-- ✅ **Easiest to deploy** (3 minutes, 3 clicks!)
-- ✅ Single Python file
-- ✅ Perfect for quick prototypes
-- ⚠️ Click-to-place instead of drag-and-drop
-- 📂 Code: `streamlit_app/` folder
+### 백엔드
+- Python 3.x
+- Flask (웹 프레임워크)
+- pytrends (Google Trends API)
+- Flask-CORS (CORS 지원)
 
-**Quick recommendation:**
-- Want the best UX and don't mind spending 8 minutes deploying? → **Flask + React**
-- Want to deploy in 3 minutes with minimal effort? → **Streamlit**
+### 프론트엔드
+- HTML5
+- CSS3
+- Vanilla JavaScript
 
----
+## 설치 및 실행
 
-## Features (Flask + React Version)
+### 1. 필수 패키지 설치
 
-- **Soccer Field Layout**: Arrange up to 11 stock tickers on a beautiful soccer field background
-- **Drag & Drop**: Freely position each ticker anywhere on the field
-- **Real-time Stock Data**: Fetches company names and returns using Yahoo Finance API (yfinance)
-- **Performance Visualization**: Color-coded circles show stock performance at a glance
-- **Multiple Timeframes**: View returns over 1 Week, 1 Month, 6 Months, or 1 Year
-- **Exchange Flags**: Each ticker displays the flag of its stock exchange
-- **Responsive Design**: Works on desktop and mobile devices
-
-## Tech Stack
-
-### Backend
-- **Flask**: Python web framework
-- **yfinance**: Yahoo Finance API for stock data
-- **Flask-CORS**: Enable cross-origin requests
-
-### Frontend
-- **React**: UI framework
-- **react-draggable**: Drag and drop functionality
-- **Axios**: HTTP client for API requests
-
-## Installation & Setup
-
-### Prerequisites
-- Python 3.8+
-- Node.js 14+
-- npm or yarn
-
-### Backend Setup
-
-1. Navigate to the backend directory:
 ```bash
 cd backend
-```
-
-2. Create a virtual environment:
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-3. Install dependencies:
-```bash
 pip install -r requirements.txt
 ```
 
-4. Run the Flask server:
+### 2. 백엔드 서버 실행
+
 ```bash
+cd backend
 python app.py
 ```
 
-The backend server will start at `http://localhost:5000`
+서버가 http://localhost:5000 에서 실행됩니다.
 
-### Frontend Setup
+### 3. 프론트엔드 실행
 
-1. Navigate to the frontend directory:
+간단한 HTTP 서버로 index.html을 서빙합니다:
+
 ```bash
-cd frontend
+# 프로젝트 루트 디렉토리에서
+# Python 3 사용
+python -m http.server 8000
+
+# 또는 Node.js의 http-server 사용
+npx http-server -p 8000
 ```
 
-2. Install dependencies:
-```bash
-npm install
-```
+브라우저에서 http://localhost:8000 을 열면 웹앱을 사용할 수 있습니다.
 
-3. Start the development server:
-```bash
-npm start
-```
+## API 엔드포인트
 
-The app will open at `http://localhost:3000`
+### GET /api/trends
 
-## Deployment (웹에서 실행하기)
-
-### 추천 방법: Railway + Vercel (완전 무료)
-
-이 방법이 가장 쉽고 빠릅니다!
-
-#### 1. Backend 배포 (Railway)
-
-1. [Railway](https://railway.app/) 가입 (GitHub 계정으로 로그인)
-2. "New Project" 클릭
-3. "Deploy from GitHub repo" 선택
-4. 이 저장소 선택
-5. "Add variables" 클릭하여 환경 변수 추가:
-   - `PORT`: 자동 설정됨 (건드릴 필요 없음)
-6. Root directory를 `backend`로 설정
-7. 배포 완료되면 URL을 복사 (예: `https://your-app.railway.app`)
-
-#### 2. Frontend 배포 (Vercel)
-
-1. [Vercel](https://vercel.com/) 가입 (GitHub 계정으로 로그인)
-2. "New Project" 클릭
-3. 이 저장소 선택
-4. "Root Directory"를 `frontend`로 설정
-5. Environment Variables 추가:
-   - Name: `REACT_APP_API_URL`
-   - Value: Railway에서 받은 백엔드 URL (예: `https://your-app.railway.app`)
-6. "Deploy" 클릭
-7. 배포 완료! Vercel이 제공하는 URL로 접속하면 됩니다
-
-### 대안 방법 1: Render (Backend + Frontend 모두)
-
-#### Backend 배포
-1. [Render](https://render.com/) 가입
-2. "New Web Service" 클릭
-3. GitHub 저장소 연결
-4. 설정:
-   - **Name**: stock-lineup-backend
-   - **Root Directory**: `backend`
-   - **Environment**: Python 3
-   - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `python app.py`
-   - **Plan**: Free
-5. 배포 후 URL 복사
-
-#### Frontend 배포
-1. Render에서 "New Static Site" 클릭
-2. 설정:
-   - **Name**: stock-lineup-frontend
-   - **Root Directory**: `frontend`
-   - **Build Command**: `npm install && npm run build`
-   - **Publish Directory**: `build`
-3. Environment Variables:
-   - `REACT_APP_API_URL`: 백엔드 URL
-4. Deploy
-
-### 대안 방법 2: Netlify (Frontend만)
-
-1. [Netlify](https://netlify.com/) 가입
-2. "New site from Git" 클릭
-3. 저장소 연결
-4. Build settings:
-   - **Base directory**: `frontend`
-   - **Build command**: `npm run build`
-   - **Publish directory**: `frontend/build`
-5. Environment variables:
-   - `REACT_APP_API_URL`: 백엔드 URL
-6. Deploy
-
-### 배포 체크리스트
-
-- [ ] Backend가 정상 작동하는지 확인 (`/api/health` 엔드포인트 테스트)
-- [ ] Frontend의 환경 변수에 올바른 Backend URL 설정
-- [ ] CORS가 활성화되어 있는지 확인 (이미 설정되어 있음)
-- [ ] 무료 플랜의 경우 일정 시간 후 sleep 모드로 전환될 수 있음 (첫 요청 시 약간 느릴 수 있음)
-
-### 배포 후 테스트
-
-배포된 웹사이트에서:
-1. 티커 입력 (예: AAPL)
-2. 데이터가 정상적으로 로드되는지 확인
-3. 드래그 앤 드롭이 작동하는지 확인
-
-문제가 있다면 브라우저 개발자 도구(F12)의 Console 탭에서 에러 확인!
-
-## Usage
-
-1. **Add Tickers**: Enter a stock ticker symbol (e.g., AAPL, GOOGL, MSFT) and click "Add Ticker"
-2. **Select Timeframe**: Choose your preferred timeframe (1W, 1M, 6M, 1Y) from the top-right corner
-3. **Drag Players**: Click and drag any ticker to position it on the field
-4. **View Performance**:
-   - Green = Excellent performance (>10%)
-   - Light green = Good performance (5-10%)
-   - Blue = Positive performance (0-5%)
-   - Orange = Negative performance (-5-0%)
-   - Red = Poor performance (<-5%)
-5. **Remove Players**: Hover over a ticker and click the × button to remove it
-
-## Popular Tickers to Try
-
-- **Tech**: AAPL, GOOGL, MSFT, TSLA, NVDA, META, AMZN
-- **Finance**: JPM, BAC, GS, V, MA
-- **Consumer**: WMT, KO, PEP, MCD, NKE
-- **Healthcare**: JNJ, PFE, UNH, ABBV
-
-## API Endpoints
-
-### GET /api/ticker/<symbol>
-Fetch stock information for a ticker symbol.
+한국과 일본의 트렌딩 검색어를 가져옵니다.
 
 **Parameters:**
-- `timeframe` (optional): 1W, 1M, 6M, or 1Y (default: 1M)
+- `timeframe` (optional): 1, 7, 또는 30 (기본값: 1)
+  - 1: 오늘
+  - 7: 지난 1주일
+  - 30: 지난 1달
 
 **Response:**
 ```json
 {
-  "symbol": "AAPL",
-  "name": "Apple Inc.",
-  "exchange": "NMS",
-  "countryCode": "US",
-  "returns": 12.5,
-  "timeframe": "1M"
+  "korea": ["검색어1", "검색어2", ...],
+  "japan": ["検索ワード1", "検索ワード2", ...],
+  "timeframe": 1,
+  "timestamp": "2025-10-26T12:00:00"
 }
 ```
 
 ### GET /api/health
-Health check endpoint.
 
-## Project Structure
+서버 상태 확인
+
+**Response:**
+```json
+{
+  "status": "healthy"
+}
+```
+
+## 사용 방법
+
+1. 웹 페이지에 접속합니다
+2. 상단의 기간 버튼(오늘/지난 1주일/지난 1달)을 클릭합니다
+3. 한국과 일본의 인기 검색어가 좌우로 표시됩니다
+4. 검색어는 순위와 함께 표시됩니다
+
+## 프로젝트 구조
 
 ```
-stock-lineup-visualizer/
+pytrends-trend-comparison/
 ├── backend/
-│   ├── app.py              # Flask application
-│   └── requirements.txt    # Python dependencies
-├── frontend/
-│   ├── public/
-│   │   └── index.html      # HTML template
-│   ├── src/
-│   │   ├── App.js          # Main application component
-│   │   ├── App.css         # Main styles
-│   │   ├── SoccerField.js  # Soccer field component
-│   │   ├── SoccerField.css # Field styles
-│   │   ├── index.js        # React entry point
-│   │   └── index.css       # Global styles
-│   ├── package.json        # NPM dependencies
-│   └── .env               # Environment variables
-├── .gitignore
-└── README.md
+│   ├── app.py              # Flask API 서버
+│   └── requirements.txt    # Python 의존성 패키지
+├── index.html              # 프론트엔드 페이지
+└── README.md               # 프로젝트 문서
 ```
 
-## Performance Color Coding
+## 주의사항
 
-| Returns | Color | Performance |
-|---------|-------|-------------|
-| > 10% | Green | Excellent |
-| 5-10% | Light Green | Good |
-| 0-5% | Blue | Positive |
-| -5-0% | Orange | Negative |
-| < -5% | Red | Poor |
+- Google Trends API는 요청 제한이 있을 수 있습니다
+- 너무 자주 요청하면 일시적으로 차단될 수 있습니다
+- 프로덕션 환경에서는 캐싱을 구현하는 것을 권장합니다
+- `trending_searches()` API는 실시간 데이터를 제공하므로 timeframe 파라미터는 현재 구현에서 참고용입니다
 
-## Troubleshooting
+## 배포
 
-### Backend Issues
+### 백엔드
+- Heroku, Railway, Render 등의 플랫폼에 배포 가능
+- `backend/` 디렉토리의 파일들을 배포
 
-**Port already in use:**
-```bash
-# Change port in backend/app.py
-app.run(debug=True, port=5001)  # Use different port
-```
+### 프론트엔드
+- Netlify, Vercel, GitHub Pages 등에 배포 가능
+- `index.html` 파일의 `API_URL`을 배포된 백엔드 URL로 변경
 
-**yfinance data not loading:**
-- Check your internet connection
-- Some tickers may have limited historical data
-- Try a different ticker symbol
+## 트러블슈팅
 
-### Frontend Issues
+### CORS 에러 발생 시
+- Flask-CORS가 올바르게 설치되어 있는지 확인
+- 백엔드 서버가 정상적으로 실행 중인지 확인
 
-**CORS errors:**
-- Ensure Flask-CORS is installed in the backend
-- Check that the API_URL in `.env` matches your backend URL
+### 데이터가 로드되지 않을 때
+- 백엔드 서버가 실행 중인지 확인 (http://localhost:5000/api/health 접속)
+- 브라우저 콘솔에서 에러 메시지 확인
+- 인터넷 연결 상태 확인
 
-**Cannot connect to backend:**
-- Verify the backend is running on port 5000
-- Check the `REACT_APP_API_URL` in `frontend/.env`
+## 라이선스
 
-## Future Enhancements
-
-- Save and load lineups
-- Share lineups with others
-- Add more formation presets (4-4-2, 4-3-3, etc.)
-- Export lineup as image
-- Compare multiple lineups
-- Add sector/industry information
-- Historical lineup performance tracking
-
-## License
-
-MIT License - feel free to use this project for personal or commercial purposes.
-
-## Credits
-
-Inspired by FotMob's lineup builder feature.
-
----
-
-Built with ⚽ and 📈
+MIT License

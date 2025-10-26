@@ -1,101 +1,61 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-import yfinance as yf
+from pytrends.request import TrendReq
 from datetime import datetime, timedelta
-import pycountry
 import os
 
 app = Flask(__name__)
 CORS(app)
 
-# Map exchanges to country codes for flags
-EXCHANGE_TO_COUNTRY = {
-    'NMS': 'US',  # NASDAQ
-    'NYQ': 'US',  # NYSE
-    'PCX': 'US',  # NYSE Arca
-    'BTS': 'US',  # BATS
-    'NGM': 'US',  # NASDAQ Global Market
-    'NCM': 'US',  # NASDAQ Capital Market
-    'ASE': 'US',  # NYSE American
-    'LSE': 'GB',  # London Stock Exchange
-    'TSE': 'JP',  # Tokyo Stock Exchange
-    'HKG': 'HK',  # Hong Kong
-    'FRA': 'DE',  # Frankfurt
-    'EPA': 'FR',  # Euronext Paris
-    'TOR': 'CA',  # Toronto
-}
-
-def get_period_for_timeframe(timeframe):
-    """Convert timeframe to yfinance period"""
-    periods = {
-        '1W': '1mo',  # Need more data to calculate 1 week
-        '1M': '3mo',
-        '6M': '1y',
-        '1Y': '2y'
-    }
-    return periods.get(timeframe, '1y')
-
-def calculate_returns(ticker_symbol, timeframe):
-    """Calculate returns for the given timeframe"""
+def get_trending_searches(country_code, timeframe_days):
+    """
+    Get trending searches for a specific country
+    country_code: 'KR' for Korea, 'JP' for Japan
+    timeframe_days: 1, 7, or 30 for daily, weekly, or monthly trends
+    """
     try:
-        ticker = yf.Ticker(ticker_symbol)
-        period = get_period_for_timeframe(timeframe)
-        hist = ticker.history(period=period)
+        pytrends = TrendReq(hl='ko' if country_code == 'KR' else 'ja', tz=540)
 
-        if hist.empty:
-            return None
+        # Get trending searches for the country
+        trending_searches_df = pytrends.trending_searches(pn=country_code.lower())
 
-        # Determine how many days back to look
-        days_map = {
-            '1W': 7,
-            '1M': 30,
-            '6M': 180,
-            '1Y': 365
-        }
-        days_back = days_map.get(timeframe, 365)
+        # Convert to list and limit to top 20
+        trends = trending_searches_df[0].head(20).tolist()
 
-        # Get the price from days_back ago and current price
-        if len(hist) < days_back:
-            days_back = len(hist) - 1
-
-        if days_back < 1:
-            return None
-
-        start_price = hist['Close'].iloc[-days_back]
-        current_price = hist['Close'].iloc[-1]
-
-        returns = ((current_price - start_price) / start_price) * 100
-        return round(returns, 2)
+        return trends
     except Exception as e:
-        print(f"Error calculating returns for {ticker_symbol}: {e}")
-        return None
+        print(f"Error getting trends for {country_code}: {e}")
+        return []
 
-@app.route('/api/ticker/<symbol>', methods=['GET'])
-def get_ticker_info(symbol):
-    """Get ticker information including company name, exchange, and returns"""
+@app.route('/api/trends', methods=['GET'])
+def get_trends():
+    """Get trending searches for Korea and Japan"""
     try:
-        timeframe = request.args.get('timeframe', '1M')
-        ticker = yf.Ticker(symbol.upper())
-        info = ticker.info
+        # Get timeframe parameter (default to 1 day)
+        timeframe = request.args.get('timeframe', '1')
+        timeframe_days = int(timeframe)
 
-        # Get basic info
-        company_name = info.get('longName') or info.get('shortName') or symbol
-        exchange = info.get('exchange', 'NMS')
-        country_code = EXCHANGE_TO_COUNTRY.get(exchange, 'US')
+        # Validate timeframe
+        if timeframe_days not in [1, 7, 30]:
+            return jsonify({'error': 'Invalid timeframe. Must be 1, 7, or 30'}), 400
 
-        # Calculate returns
-        returns = calculate_returns(symbol.upper(), timeframe)
+        # Get trends for Korea and Japan
+        kr_trends = get_trending_searches('KR', timeframe_days)
+        jp_trends = get_trending_searches('JP', timeframe_days)
+
+        # Ensure both lists have the same length
+        max_length = max(len(kr_trends), len(jp_trends))
+        kr_trends.extend([''] * (max_length - len(kr_trends)))
+        jp_trends.extend([''] * (max_length - len(jp_trends)))
 
         return jsonify({
-            'symbol': symbol.upper(),
-            'name': company_name,
-            'exchange': exchange,
-            'countryCode': country_code,
-            'returns': returns,
-            'timeframe': timeframe
+            'korea': kr_trends,
+            'japan': jp_trends,
+            'timeframe': timeframe_days,
+            'timestamp': datetime.now().isoformat()
         })
     except Exception as e:
-        return jsonify({'error': str(e)}), 400
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
