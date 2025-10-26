@@ -2,6 +2,30 @@
 
 pytrends를 이용하여 한국과 일본의 실시간 검색어 트렌드를 비교하는 웹 애플리케이션입니다.
 
+## 🎯 두 가지 버전 제공!
+
+이 프로젝트는 **두 가지 버전**으로 제공됩니다 - 필요에 맞게 선택하세요:
+
+### 1. **Flask + HTML 버전** (이 README)
+- ✅ 완전한 커스터마이징 가능
+- ✅ 프로페셔널한 UI/UX
+- ✅ 백엔드/프론트엔드 분리 구조
+- ⚠️ 백엔드 + 프론트엔드 각각 배포 필요
+- 📂 코드: `backend/` 폴더 + `index.html`
+
+### 2. **Streamlit 버전** ([STREAMLIT_DEPLOYMENT.md](STREAMLIT_DEPLOYMENT.md) 참고)
+- ✅ **3분만에 배포!** (가장 쉬움)
+- ✅ 단일 Python 파일
+- ✅ 자동 리로드 & 캐싱 내장
+- ⚠️ 커스터마이징 제약
+- 📂 코드: `streamlit_app/trends_app.py`
+
+**빠른 추천:**
+- 빠르게 배포하고 싶다면? → **Streamlit 버전** ✅
+- 완전한 커스터마이징이 필요하다면? → **Flask + HTML 버전** ✅
+
+---
+
 ## 기능
 
 - **실시간 트렌드 비교**: 한국과 일본의 인기 검색어를 좌우로 나란히 표시
@@ -115,13 +139,25 @@ pytrends-trend-comparison/
 
 ## 배포
 
-### 백엔드
-- Heroku, Railway, Render 등의 플랫폼에 배포 가능
-- `backend/` 디렉토리의 파일들을 배포
+### Flask + HTML 버전 배포
+상세한 배포 방법은 [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) 참고
 
-### 프론트엔드
-- Netlify, Vercel, GitHub Pages 등에 배포 가능
-- `index.html` 파일의 `API_URL`을 배포된 백엔드 URL로 변경
+**요약**:
+- **백엔드**: Render, Railway 등 (무료)
+- **프론트엔드**: Netlify, Vercel, GitHub Pages 등 (무료)
+- `index.html`의 `API_URL`을 백엔드 URL로 변경 필요
+
+### Streamlit 버전 배포 (3분 완성!)
+상세한 배포 방법은 [STREAMLIT_DEPLOYMENT.md](STREAMLIT_DEPLOYMENT.md) 참고
+
+**초간단 배포**:
+1. https://streamlit.io/cloud 접속
+2. GitHub 연결
+3. `streamlit_app/trends_app.py` 선택
+4. Deploy 클릭
+5. 완료!
+
+**Streamlit이 가장 쉬운 배포 방법입니다!** 처음 배포하시는 분들께 강력 추천합니다.
 
 ## 트러블슈팅
 
